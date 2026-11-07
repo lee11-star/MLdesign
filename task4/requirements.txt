@@ -1,0 +1,8 @@
+# Tested with Python 3.12 and CUDA-enabled PyTorch in the existing conda environment.
+torch==2.7.0
+torchvision==0.22.0
+numpy==2.4.3
+Pillow==12.1.1
+scipy==1.18.1
+matplotlib==3.11.2
+pandas==3.0.6

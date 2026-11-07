@@ -1,0 +1,10 @@
+# Existing environment inventory; no installation was performed.
+torch==2.7.0+cu126
+torchvision==0.22.0+cu126
+Pillow==12.1.1
+numpy==2.4.3
+pandas==3.0.6
+scikit-learn==1.9.1
+scipy==1.18.1
+matplotlib==3.11.2
+threadpoolctl==3.7.0
