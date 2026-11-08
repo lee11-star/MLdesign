@@ -37,6 +37,7 @@ def score_probabilities(probabilities, native_labels, val_ids):
     labels = [make_submission_mask(label > 0) for label in native_labels]
     candidates = []
     for threshold in np.arange(0.2, 0.751, 0.025):
+        threshold = float(threshold)
         scores = [dice_score(make_submission_mask(p > threshold), y) for p, y in zip(probabilities, labels)]
         candidates.append((float(np.mean(scores)), float(threshold), scores))
     mean_dice, threshold, scores = max(candidates, key=lambda item: item[0])

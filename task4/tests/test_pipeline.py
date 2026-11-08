@@ -76,6 +76,14 @@ class PipelineTests(unittest.TestCase):
         torch.testing.assert_close((images[:, :1] > 0.5).float(), labels)
         torch.testing.assert_close(transformed_weights, 1 + 2 * labels)
 
+    def test_selected_dice_matches_exported_threshold_mask(self):
+        from train import dice_score, score_probabilities
+        probability = np.array([[0.5, 0.49], [0.49, 0.9]], dtype=np.float32)
+        label = np.array([[1, 0], [0, 1]], dtype=bool)
+        result, _, targets = score_probabilities([probability], [label], ['1'])
+        exported = make_submission_mask(probability > result['threshold'])
+        self.assertAlmostEqual(result['mean_dice'], dice_score(exported, targets[0]), places=12)
+
     def test_row_major_one_based_rle_and_sample_order(self):
         expanded = make_submission_mask(np.array([[1, 0], [0, 0]], bool), size=4)
         np.testing.assert_array_equal(expanded, [[1, 1, 1, 0], [1, 1, 1, 0],

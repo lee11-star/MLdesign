@@ -1,4 +1,5 @@
 """Fixed-budget grouped OOF audit after the public leaderboard regression."""
+import argparse
 import hashlib
 import json
 from pathlib import Path
@@ -116,4 +117,5 @@ def audit():
 
 
 if __name__ == '__main__':
+    argparse.ArgumentParser(description=__doc__).parse_args()
     audit()

@@ -16,21 +16,31 @@ RMSE按全部坐标残差先求均方再开方，即`sqrt(mean((prediction_xy - 
 
 ## 训练过程
 
-课程数据位于`detection/`，按原解压结构保留训练图、测试图、CSV及XML。ImageNet参数需要自行准备，默认从相邻`task1/outputs/torch_cache/hub/checkpoints/`读取ResNet18和ConvNeXt-Tiny权重。
+课程数据位于detection/，保留训练图、测试图、坐标CSV、XML和sample_submission.csv。ImageNet参数需自行准备，放在相邻task1/outputs/torch_cache/hub/checkpoints/目录：resnet18-f37072fd.pth与convnext_tiny-983f1562.pth。可用train.py --pretrained指定初版权重；后续编排沿用上述相对缓存位置。
 
-初版384输入、batch=8，训练80轮并按12图选择第61轮；全量保留80轮余弦周期训练61轮。后续主要三折比较固定61轮。ResNet骨干学习率1.5e-4、ConvNeXt为3e-5，定位头1e-3，AdamW、weight decay=0.01、梯度裁剪5。增强同步变换图像与坐标，包括翻转、旋转、缩放、平移和颜色变化。
+初版384输入、batch=8，训练80轮，原实验选第61轮；全量保留80轮余弦周期训练61轮。后续三折比较固定61轮，ResNet骨干学习率1.5e-4、ConvNeXt为3e-5，定位头1e-3，AdamW、weight decay=0.01、梯度裁剪5。增强同步变换图像与坐标。
+
+从课程数据开始，依次运行：
 
 ```powershell
-python train.py --help
-python baseline.py --help
-python predict.py --help
-python predict_ensemble.py --help
-python pipeline.py --help
+cd task3
+python -m pip install -r requirements.txt
+python baseline.py
+python resolution_screen.py
+python local_refinement.py
+python export_optimized.py
+python cross_validation.py
+python decoder_comparison.py
+python coordinate_training.py
+python resolution_comparison.py
+python pipeline.py
 ```
 
-单模型基线使用`train.py`；`baseline.py`完成初版流程，`cross_validation.py`生成三折审计，`decoder_comparison.py`比较有效区域解码，`coordinate_training.py`训练联合损失，`resolution_comparison.py`比较384/512融合，`pipeline.py`完成ConvNeXt与最终固定融合。后续阶段需要前一阶段的模型与OOF文件；数据和已训练权重不包含在源码中。
+baseline.py生成records.csv、split.json、初版权重和submission.csv；resolution_screen.py生成512/640对照；local_refinement.py完成局部精定位对照；export_optimized.py比较原优化候选并生成optimization_summary.json、bundle和submission_optimized.csv。cross_validation.py由这些已生成配置建立三折审计；其后依次完成有效区域解码、坐标联合损失、384/512融合和ConvNeXt固定融合。
 
-已有最终模型与bundle准备完毕后，执行`python pipeline.py --predict-only`，或以`predict_ensemble.py --bundle <配置路径>`重载坐标融合。迁移机器时应核对bundle保存的检查点路径。
+优化导出与分辨率比较不读取人工成绩JSON，平台反馈单独保存，不作为训练或选型的运行前提。每个编排入口均支持--help；已有最终模型后，可执行python pipeline.py --predict-only重新生成submission_backbone.csv，或用predict_ensemble.py --bundle指定融合配置。迁移既有产物时需相应调整JSON中的检查点路径。
+
+原始数据与训练权重未随源码发布；中间产物由上述阶段生成。本次修复验证了缺失阶段的调用及导出行为，没有重新运行整套GPU训练。
 
 ## 分析过程与结果
 

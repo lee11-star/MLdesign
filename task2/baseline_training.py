@@ -74,6 +74,7 @@ def stage_train(name, architecture, epochs, lr, final=False, horizon=None):
 def main():
     if Path.cwd().resolve() != ROOT:
         raise ValueError('Run this script from the task2 directory')
+    (ROOT / 'outputs').mkdir(exist_ok=True)
     if not (ROOT / 'outputs/data/audit.json').exists():
         command(['audit_data.py'], ROOT / 'outputs/audit_console.log')
     stage_train('cnn_baseline', 'cnn', 25, 1e-3)

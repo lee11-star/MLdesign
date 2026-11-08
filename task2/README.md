@@ -16,21 +16,31 @@
 
 ## 训练过程
 
-标准增强包含水平翻转、±10°旋转、±8%平移和0.9–1.1缩放，再调整模型输入。DAN输入224、batch=64、训练30轮，分类头学习率3e-4、其余参数3e-5，AdamW、weight decay=1e-4。普通DAN不启用标签平滑、MixUp或额外头dropout；可信度候选增加top70%排序间隔0.15的正则，原标签不变。
+先在仓库根目录进入task2，安装requirements.txt。课程数据、模板和ZIP路径沿用emotion_classifier/data.py与audit_data.py的默认值，可用--help查看。
 
-先将课程数据及提交范式按`emotion_classifier/data.py`中的`DEFAULT_DATA`、`DEFAULT_TEMPLATE`放置，再执行审计生成manifest和像素缓存。公开DAN检查点来源为[作者仓库](https://github.com/yaoing/DAN)，需自行准备到`outputs/round8/pretrained/dan_affectnet7.pth`。全量训练使用清洗后28165张图，固定30轮。
+主流程需要在相邻task1/outputs/torch_cache/hub/checkpoints目录准备resnet18-f37072fd.pth、convnext_tiny-983f1562.pth、efficientnet_b2_rwightman-c35c1473.pth三个ImageNet检查点。公开DAN参数来源为[作者仓库](https://github.com/yaoing/DAN)，保存为outputs/round8/pretrained/dan_affectnet7.pth。无需下载AffectNet原图。审计记录直接核对仓库中的emotion_classifier/facial.py，不要求另外准备下载源码快照。
+
+标准增强包含水平翻转、±10°旋转、±8%平移和0.9–1.1缩放。DAN输入224、batch=64、固定30轮，分类头学习率3e-4、其余参数3e-5，AdamW、weight decay=1e-4。普通DAN不启用标签平滑、MixUp或额外头dropout；可信度候选增加top70%排序间隔0.15的正则。
+
+从课程数据开始，按以下顺序生成前置产物；每个阶段完成后再进入下一阶段：
 
 ```powershell
-python audit_data.py --help
-python train.py --help
-python predict.py --help
-python pipeline.py --help
+cd task2
+python -m pip install -r requirements.txt
+python audit_data.py
+python baseline_training.py
+python model_selection.py
+python regularization.py
+python baseline.py
+python generalization.py
+python pipeline.py
 python verify.py
+python validate_submission.py submission_round8.csv
 ```
 
-`train.py`可独立训练`--model dan --image-size 224 --epochs 30 --batch-size 64 --lr 0.0003 --backbone-lr-scale 0.1 --weight-decay 0.0001`，并通过`--pretrained`指定参数文件。`predict.py --checkpoint <模型路径> --tta`输出单模型结果。
+baseline_training.py生成CNN/ResNet基线、数据划分和初始提交；model_selection.py训练三项对照并生成optimization产物；regularization.py恢复原96/128输入正则化实验，训练两个40轮ConvNeXt并生成kaggle80选型和提交；baseline.py再生成七模型融合。generalization.py生成额外分组折、固定第30轮参考概率；pipeline.py训练DAN、比较固定25%融合并按原规则决定是否导出。历史outputs子目录名保留以对应报告中的产物。
 
-`baseline_training.py`建立早期训练流程，`model_selection.py`和`baseline.py`构建融合基线；`feature_transfer.py`、`generalization.py`保留补充对照的必要依赖。最终`pipeline.py`依赖既有七模型概率、原折与额外折manifest及公开DAN参数，不能在缺少前置产物时仅凭一次命令重建全部历史实验。原实验中的`outputs/round4`、`round7`、`round8`为产物位置，保留以对应模型配置。
+train.py可独立训练--model dan --image-size 224 --epochs 30 --batch-size 64 --lr 0.0003 --backbone-lr-scale 0.1 --weight-decay 0.0001，并通过--pretrained指定公开参数文件。feature_transfer.py为DINO补充实验，不是上述DAN主流程的运行前提。训练会消耗多轮GPU时间，本次源码修复没有重新训练模型。
 
 ## 分析过程与结果
 

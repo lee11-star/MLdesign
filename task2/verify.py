@@ -80,7 +80,7 @@ def main():
     assert digest(contract['cache']) == contract['cache_sha256']
     assert digest(WEIGHTS) == contract['source_parameters']['sha256']
     for name, sha in contract['source_files'].items():
-        assert digest(OUT / 'sources' / name) == sha
+        assert digest(ROOT / name) == sha
     rows = read_manifest(MANIFEST)
     check_split(rows)
     for row in rows:

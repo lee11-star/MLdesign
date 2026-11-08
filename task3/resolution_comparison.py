@@ -115,8 +115,7 @@ def run():
     result = {**screen, 'selected': selected_name, 'selection': {key: value for key, value in selected.items() if key != 'xy'},
               'validation_reloaded': verification_val, 'test_verification': verification_test,
               'full_model': full_fit, 'old_files_unchanged': hashes, 'target_public_rmse': 11.5,
-              'target_verified': False, 'new_public_score': None,
-              'feedback': json.loads((ROOT/'outputs/target115/feedback.json').read_text())}
+              'target_verified': False, 'new_public_score': None}
     dump(OUTPUT/'summary.json', result)
     print(json.dumps({'selected': selected_name, 'oof': selected['metrics'], 'validation12': verification_val,
                       'test': verification_test, 'target_verified': False}, indent=2), flush=True)

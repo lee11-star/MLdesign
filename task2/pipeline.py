@@ -36,7 +36,7 @@ def audit_real_data():
         assert digest(ROOT / 'outputs/data/pixels.npy') == recorded['cache_sha256']
         assert digest(WEIGHTS) == recorded['source_parameters']['sha256']
         for name, sha in recorded['source_files'].items():
-            assert digest(OUT / 'sources' / name) == sha
+            assert digest(ROOT / name) == sha
         return rows
     cache = np.load(ROOT / 'outputs/data/pixels.npy', mmap_mode='r', allow_pickle=False)
     checked = 0
@@ -61,7 +61,7 @@ def audit_real_data():
                       download='https://drive.google.com/file/d/1_Z-U7rT5NJ3Vc73aN2ZBmuvCkzUQG4jT/view',
                       task='Official AffectNet7 parameter checkpoint; source images not downloaded.',
                       source_head='Discarded; fresh six-class head fitted only on real task training split.'),
-                  source_files={p.name: digest(p) for p in (OUT / 'sources').iterdir() if p.is_file()})
+                  source_files={'emotion_classifier/facial.py': digest(ROOT / 'emotion_classifier/facial.py')})
     assert checked == 28165 and result['split_counts']['train'] == 22532 and result['split_counts']['val'] == 5633
     save_json(result, previous)
     return rows
