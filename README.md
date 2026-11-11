@@ -1,35 +1,38 @@
 # 机器学习课程设计
 
-四个任务分别放在一个目录中，每个目录的README说明模型结构、实验方案、训练过程与结果分析。
+四项计算机视觉实验的源码与运行说明。任务编号与《机器学习课程项目报告》的章节对应。
 
-| 目录 | 项目 | 主要入口 |
-| --- | --- | --- |
-| [task1](task1) | 植物图像分类 | `train.py`、`train_full.py`、`predict.py` |
-| [task2](task2) | 人脸表情识别 | `train.py`、`pipeline.py`、`predict.py` |
-| [task3](task3) | 眼底中心凹定位 | `train.py`、`pipeline.py`、`predict_ensemble.py` |
-| [task4](task4) | 视网膜血管分割 | `train.py`、`predict.py`、`verify_submission.py` |
+| 报告章节 | 任务 | 报告中的本地结果 | 阅读入口 |
+| --- | --- | --- | --- |
+| 第一章 · Task 1 | 植物图像五分类 | seed 42 五折 OOF micro-F1 **0.956** | [实验说明](task1/README.md) · [模型实现](task1/plant_classifier/modeling.py) |
+| 第二章 · Task 2 | 人脸表情识别 | 固定分组验证准确率 **72.38%** | [实验说明](task2/README.md) · [实验流程](task2/pipeline.py) |
+| 第三章 · Task 3 | 眼底中心凹定位 | 三折合并 OOF RMSE **16.4101 像素** | [实验说明](task3/README.md) · [实验流程](task3/pipeline.py) |
+| 第四章 · Task 4 | 视网膜血管分割 | 四图验证转换后平均 Dice **0.851209** | [实验说明](task4/README.md) · [训练入口](task4/train.py) |
 
-各目录保留实现包、必要的实验编排模块、测试和`requirements.txt`。历史报告、重复版本目录、原始数据、模型权重及缓存不随源码上传。脚本中的`outputs/`用于保存运行产物，部分实验编排需要先完成前置训练，具体依赖见各任务说明。
+OOF 指汇总各折留出样本的预测。各任务 README 说明验证条件、模型版本和报告结果的来源。
 
-## 运行环境
+## 运行准备
 
-已有实验使用Python 3.12、PyTorch 2.7.0+cu126及RTX 4060 Laptop GPU。进入对应任务目录后安装依赖，例如：
+实验环境为 Windows、Python 3.12、PyTorch 2.7.0+cu126 和 RTX 4060 Laptop GPU。先按各任务说明准备课程数据，再进入对应目录安装依赖。以第一章为例：
 
 ```powershell
-cd task1
+git clone https://github.com/lee11-star/MLdesign.git
+cd MLdesign/task1
 python -m pip install -r requirements.txt
 python train.py --help
 ```
 
-课程数据需要自行准备。task1使用DINOv2预训练参数，task2使用ImageNet和DAN公开参数，task3使用ImageNet骨干；task4从零训练。部分历史编排保留了原实验机的解释器或权重路径，新机器上需按任务说明调整。源码整理保留`task1`至`task4`的相对位置，便于共享预训练权重缓存。
+| 任务 | 初始化参数 |
+| --- | --- |
+| Task 1 | DINOv2-Small |
+| Task 2 | ImageNet 和 DAN 公开参数 |
+| Task 3 | ImageNet 预训练骨干 |
+| Task 4 | 随机初始化 |
 
-## 文件约定
+数据目录、权重路径、阶段顺序及验证命令见各任务 README。请保留四个任务目录的相对位置，部分脚本会读取共用的预训练缓存。
 
-- `README.md`：任务说明、方法、实验及复现步骤。
-- `train.py`和`predict.py`：单模型训练与推理。
-- `pipeline.py`：需要多阶段结果的最终实验编排。
-- 实现包：数据、模型、损失、指标与推理函数。
-- `tests/`：已有关键行为检查。
-- `requirements.txt`：任务依赖。
+## 查阅实验记录
 
-DAN模块的第三方许可保存在[task2/emotion_classifier/licenses/DAN-MIT.txt](task2/emotion_classifier/licenses/DAN-MIT.txt)。
+仓库提供训练、推理、验证代码和依赖清单。脚本将训练日志、模型权重、预测文件和验证结果写入各任务的 `outputs/`。报告附录列出所引用的本地记录及对应文件名，复查时可按文件名定位。原始课程数据、训练产物和提交报告保存在本地。
+
+DAN 模块许可见 [DAN-MIT.txt](task2/emotion_classifier/licenses/DAN-MIT.txt)。
